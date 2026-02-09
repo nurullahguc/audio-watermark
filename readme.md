@@ -1,77 +1,76 @@
-```markdown
 # Audio Watermarking (MP3) — DWT + QIM (Python)
 
-This project embeds an **invisible, robust watermark** inside an MP3’s **audio content** (not filename or ID3 tags).  
-Even if the file name changes or metadata is removed, the watermark can still be extracted from the audio.
+Bu proje, MP3 dosyasinin **ses icerigine** (dosya adi veya ID3 etiketlerine degil) **gorunmez ve dayanıklı** bir watermark gomuyor.  
+Dosya adi degisse ya da metadata silinse bile watermark, ses iceriginden geri alinabilir.
 
-It works by decoding MP3 → PCM (WAV), embedding the watermark in the **DWT (Discrete Wavelet Transform) domain** using **QIM (Quantization Index Modulation)**, then encoding back to MP3.
+Akis: MP3 -> PCM (WAV) -> DWT (Discrete Wavelet Transform) alaninda QIM (Quantization Index Modulation) ile gomme -> tekrar MP3.
 
 ---
 
-## Requirements
+## Gereksinimler
 
 - **Python 3.9+**
-- **FFmpeg** (must be accessible from terminal)
-- Python packages: `numpy`, `scipy`, `pywavelets`
+- **FFmpeg** (terminalden calisabilir olmali)
+- Python paketleri: `numpy`, `scipy`, `pywavelets`
 
 ---
 
-## Project Structure
+## Proje Yapisi
 
-Place your input MP3 in the same folder:
+Girdi MP3 dosyanizi ayni klasore koyun:
+
 ```
-
 audio-watermark/
 ├─ app.py
 └─ music.mp3
-
-````
+```
 
 ---
 
-## Install Dependencies
+## Kurulum
 
-### 1) Install Python packages
+### 1) Python paketleri
+
 ```bash
 pip install numpy scipy pywavelets
-````
+```
 
-### 2) Verify FFmpeg
+### 2) FFmpeg kontrolu
 
 ```bash
 ffmpeg -version
 ```
 
-If you see FFmpeg version info, you're good to go.
+Versiyon bilgisi goruyorsaniz hazirsiniz.
 
 ---
 
-## Usage
+## Hizli Baslangic
 
-### Embed Watermark (Create `watermarked.mp3`)
+### Watermark Gom (watermarked.mp3 olustur)
 
-This embeds `music_id` and `copyright_id` invisibly into the audio:
+`music_id` ve `copyright_id` degerlerini ses icerigine gomur:
 
 ```bash
 python app.py embed --in music.mp3 --out watermarked.mp3 --music-id "MUSIC-001" --copyright-id "TELIF-2026" --strength 1.8 --repetition 9 --stride 5 --band d1
 ```
 
-Expected result:
+Beklenen sonuc:
 
-- A new file named `watermarked.mp3` is created.
-- Output JSON shows `"status": "ok"`.
+- `watermarked.mp3` olusur.
+- JSON cikisi `"status": "ok"` dondurur.
 
 ---
 
-### Extract Watermark (Read embedded data)
+### Watermark Cikar (gomulu veriyi oku)
 
-Use the **same parameters** you used for embedding:
+Gommede kullanilan **ayni parametreleri** kullanin:
 
 ```bash
 python app.py extract --in watermarked.mp3 --strength 1.8 --repetition 9 --stride 5 --band d1
 ```
 
-Expected output:
+Beklenen cikti:
 
 ```json
 {
@@ -87,17 +86,17 @@ Expected output:
 
 ---
 
-## Parameter Notes (Important)
+## Parametre Notlari (Onemli)
 
-When extracting, these must match the embed parameters:
+Extract sirasinda su parametreler **gommedekiyle ayni** olmali:
 
 - `--strength`
 - `--repetition`
 - `--stride`
-- `--band` (`d1` or `d2`)
-- (if changed) `--wavelet`, `--level`
+- `--band` (`d1` veya `d2`)
+- (degistirildi ise) `--wavelet`, `--level`
 
-Recommended robust settings that worked reliably:
+Guclu ve stabil ayarlar (onerilen):
 
 - `--strength 1.8`
 - `--repetition 9`
@@ -106,37 +105,33 @@ Recommended robust settings that worked reliably:
 
 ---
 
-## Common Issues
+## Sik Karsilasilan Sorunlar
 
 ### CRC verification failed
 
-If you see an error like:
+Ornek hata:
 
 ```
 CRC verification failed
 ```
 
-It usually means the watermark could not be reliably recovered (often due to MP3 re-encoding effects or mismatched parameters).
+Genelde watermarkin guvenilir sekilde geri alinamadigini gosterir (MP3 yeniden kodlama etkileri veya parametre uyumsuzlugu).
 
-Fix:
+Cozum:
 
-- Ensure extract uses the **same parameters** as embed
-- Increase robustness:
-  - increase `--repetition` (e.g., 9 → 11)
-  - slightly increase `--strength` (e.g., 1.8 → 2.0)
-  - reduce `--stride` (e.g., 5 → 4)
+- Extract tarafinda **ayni parametreleri** kullanin
+- Dayanikliligi artirin:
+  - `--repetition` degerini artirin (ornegin 9 -> 11)
+  - `--strength` degerini biraz yukseltin (ornegin 1.8 -> 2.0)
+  - `--stride` degerini azaltin (ornegin 5 -> 4)
 
 ---
 
-## License / Notes
+## Notlar
 
-This is a practical watermarking prototype for identification and tracking.
-For production-level deployments, consider adding:
+Bu, kimliklendirme ve takip icin pratik bir watermark prototipidir.
+Uretim ortami icin asagidakiler eklenebilir:
 
-- Payload encryption (AES)
-- Error correction codes (BCH/Reed-Solomon)
-- Spread-spectrum embedding for even stronger robustness
-
-```
-
-```
+- Payload sifreleme (AES)
+- Hata duzeltme kodlari (BCH/Reed-Solomon)
+- Daha guclu dayanıklilik icin spread-spectrum gomleme
